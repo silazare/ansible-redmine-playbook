@@ -10,7 +10,6 @@ Hence things are oversimplified and credentials are stored as plain text vars wi
   - AWS account with API access credentials.
 
 - Notices and possible issues:
-  - Cloudfront module may have random issues and sometimes returns HTTP 403, even if credentials are correct, need try to repeat playbook execution again.
   - Cloudfront distribution has no destroy tasks, so after destroy all the infrastructure stack, need to disable and delete it manually in AWS console.
   - RDS creation will take time, timeout is defined to 15 minutes just in case.
   - Addition of a local Host Key of the new created EC2 is used to avoid manual steps during playbook probably it could be not working if you have not permissions to change ~/.ssh/known_hosts on a local machine.
