@@ -20,7 +20,7 @@ Hence things are oversimplified and credentials are stored as plain text vars wi
  * [group_vars](./group_vars) -- Playbook variables folder
    * [all.yml_example](./group_vars/all.yml_example) -- Playbook variables example
  * [roles](./roles) -- Roles
-   * [common](.roles/common) -- Basic packages installation
+   * [common](./roles/common) -- Basic packages installation
    * [infra](./roles/infra) -- AWS infrastructure create/destroy
    * [ruby](./roles/ruby) -- Ruby packages installation
    * [redmine](./roles/ruby) -- Redmine service deploy
