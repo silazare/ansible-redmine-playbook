@@ -1,0 +1,23 @@
+# Create VPC stack
+- import_tasks: aws-vpc-create.yml
+  when: vpc_state == "present"
+
+# Create EC2 and RDS
+- import_tasks: aws-ec2-rds-create.yml
+  when: vpc_state == "present"
+
+# Create ELB and CDN
+- import_tasks: aws-elb-cdn-create.yml
+  when: vpc_state == "present"
+
+# Destroy ELB and CDN
+- import_tasks: aws-elb-cdn-destroy.yml
+  when: vpc_state == "absent"
+
+# Destroy EC2 and RDS
+- import_tasks: aws-ec2-rds-destroy.yml
+  when: vpc_state == "absent"
+
+# Destroy VPC stack
+- import_tasks: aws-vpc-destroy.yml
+  when: vpc_state == "absent"

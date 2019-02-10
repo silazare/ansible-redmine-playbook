@@ -1,0 +1,101 @@
+---
+- name: Gather facts about {{ vpc_name }} VPC
+  ec2_vpc_net_facts:
+    filters:
+      "tag:Name": "{{ vpc_name }}"
+  register: destroyed_vpc
+
+- name: Print {{ vpc_name }} VPC ID
+  debug:
+    msg: "{{ destroyed_vpc.vpcs[0].id }}"
+    verbosity: 1
+  when:
+    - destroyed_vpc.vpcs[0] is defined
+    - destroyed_vpc.vpcs[0]|length>0
+
+- name: Destroy DB security group
+  ec2_group:
+    name: "DB-SG"
+    description: Security Group for Database
+    vpc_id: "{{ destroyed_vpc.vpcs[0].id }}"
+    state: absent
+  when:
+    - destroyed_vpc.vpcs[0] is defined
+    - destroyed_vpc.vpcs[0]|length>0
+
+- name: Destroy WEB security group
+  ec2_group:
+    name: "WEB-SG"
+    description: Security Group for Webserver
+    vpc_id: "{{ destroyed_vpc.vpcs[0].id }}"
+    state: absent
+  when:
+    - destroyed_vpc.vpcs[0] is defined
+    - destroyed_vpc.vpcs[0]|length>0
+
+- name: Gather facts about Public subnet route table
+  ec2_vpc_route_table_facts:
+    region: "{{ aws_region }}"
+    filters:
+      "tag:Name": Public
+  register: destroyed_route
+
+- name: Print Public subnet route table
+  debug:
+    msg: "{{ destroyed_route.route_tables[0].id }}"
+    verbosity: 1
+  when:
+    - destroyed_route.route_tables is defined
+    - destroyed_route.route_tables|length>0
+
+- name: Destroy Public subnet route table
+  ec2_vpc_route_table:
+    vpc_id: "{{ destroyed_vpc.vpcs[0].id }}"
+    region: "{{ aws_region }}"
+    route_table_id: "{{ destroyed_route.route_tables[0].id }}"
+    lookup: id
+    state: absent
+  when:
+    - destroyed_vpc.vpcs[0] is defined
+    - destroyed_vpc.vpcs[0]|length>0
+    - destroyed_route.route_tables is defined
+    - destroyed_route.route_tables|length>0
+
+- name: Destroy IGW
+  ec2_vpc_igw:
+    region: "{{ aws_region }}"
+    vpc_id: "{{ destroyed_vpc.vpcs[0].id }}"
+    state: absent
+  when:
+    - destroyed_vpc.vpcs[0] is defined
+    - destroyed_vpc.vpcs[0]|length>0
+
+- name: Destroy subnets for database servers
+  ec2_vpc_subnet:
+    state: absent
+    vpc_id: "{{ destroyed_vpc.vpcs[0].id }}"
+    cidr: "{{ item.cidr }}"
+  when:
+    - destroyed_vpc.vpcs[0] is defined
+    - destroyed_vpc.vpcs[0]|length>0
+  with_items:
+    - "{{ db_subnet }}"
+
+- name: Destroy subnet for web servers
+  ec2_vpc_subnet:
+    state: absent
+    vpc_id: "{{ destroyed_vpc.vpcs[0].id }}"
+    cidr: "{{ web_cidr_block }}"
+  when:
+    - destroyed_vpc.vpcs[0] is defined
+    - destroyed_vpc.vpcs[0]|length>0
+
+- name: Destroy {{ vpc_name }} VPC
+  ec2_vpc_net:
+      name: "{{ vpc_name }}"
+      region: "{{ aws_region }}"
+      state: "absent"
+      cidr_block: "{{ vpc_cidr_block }}"
+      tags: "{{ vpc_resource_tags }}"
+      secret_key: "{{ secret_key }}"
+      access_key: "{{ access_key }}"

@@ -1,0 +1,134 @@
+---
+- name: Provision {{ vpc_name }} VPC
+  ec2_vpc_net:
+    name: "{{ vpc_name }}"
+    region: "{{ aws_region }}"
+    state: "present"
+    cidr_block: "{{ vpc_cidr_block }}"
+    tags: "{{ vpc_resource_tags }}"
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
+  register: created_vpc
+
+- name: Print {{ vpc_name }} VPC ID
+  debug:
+    msg: "{{ created_vpc.vpc.id }}"
+    verbosity: 1
+
+- name: Create Private subnets for database servers
+  ec2_vpc_subnet:
+    state: present
+    az: "{{ item.az }}"
+    cidr: "{{ item.cidr }}"
+    map_public: no
+    tags:
+      Name: "{{ item.name }}"
+    vpc_id: "{{ created_vpc.vpc.id }}"
+  with_items:
+    - "{{ db_subnet }}"
+  register: database_subnet
+
+- name: Create Public subnet for web servers
+  ec2_vpc_subnet:
+    state: present
+    vpc_id: "{{ created_vpc.vpc.id }}"
+    cidr: "{{ web_cidr_block }}"
+    map_public: yes
+    resource_tags:
+      Name: web
+  register: web_subnet
+
+- name: Print Public subnet facts
+  debug:
+    msg: "{{ web_subnet.subnet.id }}"
+    verbosity: 1
+
+- name: Create a list of Private subnets
+  set_fact:
+    database_subnets: "{{ database_subnets }} + [ '{{ item.subnet.id }}' ]"
+  with_items:
+    - "{{ database_subnet.results }}"
+
+- name: Print Private subnets list
+  debug:
+    msg: "{{ database_subnets }}"
+    verbosity: 1
+
+- name: Create IGW
+  ec2_vpc_igw:
+    region: "{{ aws_region }}"
+    vpc_id: "{{ created_vpc.vpc.id }}"
+    state: present
+    tags:
+      Name: "{{ vpc_name }}"
+  register: created_igw
+
+- name: Print {{ vpc_name }} IGW ID
+  debug:
+    msg: "{{ created_igw.gateway_id }}"
+    verbosity: 1
+
+- name: Create Public subnet route table
+  ec2_vpc_route_table:
+    vpc_id: "{{ created_vpc.vpc.id }}"
+    region: "{{ aws_region }}"
+    state: present
+    tags:
+      Name: Public
+    subnets:
+      - "{{ web_subnet.subnet.id }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ created_igw.gateway_id }}"
+  register: public_route_table
+
+- name: Create WEB security group
+  ec2_group:
+    name: "WEB-SG"
+    description: Security Group for Webserver
+    vpc_id: "{{ created_vpc.vpc.id }}"
+    state: present
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
+    rules:
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        cidr_ip: 0.0.0.0/0
+        rule_desc: allow all on port 22
+      - proto: tcp
+        from_port: 80
+        to_port: 80
+        cidr_ip: 0.0.0.0/0
+        rule_desc: allow all on port 80
+    tags:
+      Name: "WEB-SG"
+  register: websecgroup
+
+- name: Print WEB security group
+  debug:
+    msg: "{{ websecgroup.group_id }}"
+    verbosity: 1
+
+- name: Create DB security group
+  ec2_group:
+    name: "DB-SG"
+    description: Security Group for Database
+    vpc_id: "{{ created_vpc.vpc.id }}"
+    state: present
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
+    rules:
+      - proto: tcp
+        from_port: 3306
+        to_port: 3306
+        group_id: "{{ websecgroup.group_id }}"
+        rule_desc: allow webserver on port 3306
+    tags:
+      Name: "DB-SG"
+  register: dbsecgroup
+
+- name: Print DB security group
+  debug:
+    msg: "{{ dbsecgroup.group_id }}"
+    verbosity: 1

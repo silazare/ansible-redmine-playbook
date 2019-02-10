@@ -1,0 +1,83 @@
+---
+- name: Get all Xenial AMIs
+  ec2_ami_facts:
+    owners: 099720109477
+    region: "{{ aws_region }}"
+    filters:
+      name: "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-*"
+  register: ami_xenial
+
+- name: Get latest Xenial AMI
+  set_fact:
+    latest_ami_xenial: "{{ ami_xenial.images | sort(attribute='creation_date') | last }}"
+
+- name: Print latest Xenial AMI
+  debug:
+    msg: "{{ latest_ami_xenial.image_id }}"
+    verbosity: 1
+
+- name: Create webserver instance
+  ec2:
+    region: "{{ aws_region }}"
+    vpc_subnet_id: "{{ web_subnet.subnet.id }}"
+    group_id: "{{ websecgroup.group_id }}"
+    instance_type: "{{ instance_type }}"
+    image: "{{ latest_ami_xenial.image_id }}"
+    wait: true
+    keypair: "{{ aws_keypair }}"
+    exact_count: "{{ instance_count }}"
+    aws_secret_key: "{{ secret_key }}"
+    aws_access_key: "{{ access_key }}"
+    count_tag:
+        Name: "{{ env }}-webserver"
+        Environment: "{{ env }}"
+    instance_tags:
+        Name: "{{ env }}-webserver"
+        Environment: "{{ env }}"
+  register: created_ec2
+
+- name: Print webserver facts
+  debug:
+    msg: "{{ created_ec2.instances }}"
+    verbosity: 1
+
+- name: Create RDS subnet
+  rds_subnet_group:
+    region: "{{ aws_region }}"
+    state: present
+    name: rds-subnet
+    description: RDS subnet
+    subnets:
+      - "{{ database_subnets[0] }}"
+      - "{{ database_subnets[1] }}"
+  register: rds_subnet
+
+- name: Print RDS subnet facts
+  debug:
+    msg: "{{ rds_subnet }}"
+    verbosity: 1
+
+- name: Create RDS instance
+  rds:
+    region: "{{ aws_region }}"
+    command: create
+    instance_name: "{{ env }}-database"
+    db_engine: MySQL
+    size: 20
+    instance_type: "{{ db_instance_class }}"
+    subnet: rds-subnet
+    vpc_security_groups: "{{ dbsecgroup.group_id }}"
+    username: "{{ mysql_user }}"
+    password: "{{ mysql_password }}"
+    publicly_accessible: no
+    wait: yes
+    wait_timeout: 900
+    tags:
+        Name: "{{ env }}-database"
+        Environment: "{{ env }}"
+  register: rds_db
+
+- name: Print RDS endpoint
+  debug:
+    msg: "{{ rds_db.instance.endpoint }}"
+    verbosity: 1

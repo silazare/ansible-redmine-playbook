@@ -1,0 +1,38 @@
+---
+- name: Get facts on webserver instances
+  ec2_instance_facts:
+    aws_secret_key: "{{ secret_key }}"
+    aws_access_key: "{{ access_key }}"
+    region: "{{ aws_region }}"
+    filters:
+      "tag:Name": "{{ env }}-webserver"
+      "tag:Environment": "{{ env }}"
+      instance-state-name: running
+  register: webserver_gathered_facts
+
+- name: Get facts on ELB
+  ec2_elb_facts:
+    region: "{{ aws_region }}"
+    names: "{{ env }}-elb"
+  register: web_elb_destroy
+
+- name: Remove webserver instance from external ELB
+  ec2_elb:
+    region: "{{ aws_region }}"
+    ec2_elbs:  "{{ env }}-elb"
+    instance_id: "{{ item.instance_id }}"
+    state: absent
+    wait: yes
+  with_items:
+    - "{{ webserver_gathered_facts.instances }}"
+  when:
+    - web_elb_destroy.elbs is defined
+    - web_elb_destroy.elbs|length>0
+
+- name: Destroy external ELB
+  ec2_elb_lb:
+    name: "{{ env }}-elb"
+    state: absent
+    region: "{{ aws_region }}"
+    wait: yes
+    wait_timeout: 300

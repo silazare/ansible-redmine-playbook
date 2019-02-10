@@ -1,0 +1,40 @@
+---
+- name: Gather facts about webserver instance
+  ec2_instance_facts:
+    filters:
+      "tag:Name": "{{ env }}-webserver"
+      "tag:Environment": "{{ env }}"
+      instance-state-name: running
+  register: destroyed_ec2
+
+- name: Print webserver instance id
+  debug:
+    msg: "{{ destroyed_ec2.instances[0].instance_id }}"
+    verbosity: 1
+  when:
+    - destroyed_ec2.instances[0] is defined
+    - destroyed_ec2.instances[0]|length>0
+
+- name: Destroy webserver instance
+  ec2:
+    region: "{{ aws_region }}"
+    state: absent
+    instance_ids: "{{ destroyed_ec2.instances[0].instance_id }}"
+    wait: true
+  when:
+    - destroyed_ec2.instances[0] is defined
+    - destroyed_ec2.instances[0]|length>0
+
+- name: Destroy RDS instance
+  rds:
+    region: "{{ aws_region }}"
+    command: delete
+    instance_name: "{{ env }}-database"
+    wait: yes
+    wait_timeout: 900
+
+- name: Destroy RDS subnet
+  rds_subnet_group:
+    region: "{{ aws_region }}"
+    state: absent
+    name: rds-subnet
