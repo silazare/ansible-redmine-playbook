@@ -29,13 +29,14 @@ Hence things are oversimplified and credentials are stored as plain text vars wi
 
 ### Run steps
 
-- Clone this repository and go to its folder:
+- Clone this repository and go to its folder (install requirements if needed):
 ```sh
 $ git clone https://github.com/silazare/ansible-redmine-playbook.git
 $ cd ansible-redmine-playbook
+$ pip install -r requirements.txt
 ```
 
-- Put your own AWS ssh key file (like 'EC2.pem') in the main folder, beside the playbook.
+- Put your own AWS ssh key file (like 'EC2.pem') in the main folder, beside the playbook. File permissions should be '0600' otherwise playbook will fail.
 
 - Prepare your own group_vars/all.yml file based on group_vars/all.yml_example:
 ```sh
