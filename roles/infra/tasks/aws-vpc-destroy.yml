@@ -2,6 +2,8 @@
 - name: Gather facts about {{ vpc_name }} VPC
   ec2_vpc_net_facts:
     region: "{{ aws_region }}"
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
     filters:
       "tag:Name": "{{ vpc_name }}"
   register: destroyed_vpc
@@ -17,6 +19,8 @@
 - name: Destroy DB security group
   ec2_group:
     region: "{{ aws_region }}"
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
     name: "DB-SG"
     description: Security Group for Database
     vpc_id: "{{ destroyed_vpc.vpcs[0].id }}"
@@ -28,6 +32,8 @@
 - name: Destroy WEB security group
   ec2_group:
     region: "{{ aws_region }}"
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
     name: "WEB-SG"
     description: Security Group for Webserver
     vpc_id: "{{ destroyed_vpc.vpcs[0].id }}"
@@ -39,6 +45,8 @@
 - name: Gather facts about Public subnet route table
   ec2_vpc_route_table_facts:
     region: "{{ aws_region }}"
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
     filters:
       "tag:Name": Public
   register: destroyed_route
@@ -55,6 +63,8 @@
   ec2_vpc_route_table:
     vpc_id: "{{ destroyed_vpc.vpcs[0].id }}"
     region: "{{ aws_region }}"
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
     route_table_id: "{{ destroyed_route.route_tables[0].id }}"
     lookup: id
     state: absent
@@ -67,6 +77,8 @@
 - name: Destroy IGW
   ec2_vpc_igw:
     region: "{{ aws_region }}"
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
     vpc_id: "{{ destroyed_vpc.vpcs[0].id }}"
     state: absent
   when:
@@ -76,6 +88,8 @@
 - name: Destroy subnets for database servers
   ec2_vpc_subnet:
     region: "{{ aws_region }}"
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
     state: absent
     vpc_id: "{{ destroyed_vpc.vpcs[0].id }}"
     cidr: "{{ item.cidr }}"
@@ -88,6 +102,8 @@
 - name: Destroy subnet for web servers
   ec2_vpc_subnet:
     region: "{{ aws_region }}"
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
     state: absent
     vpc_id: "{{ destroyed_vpc.vpcs[0].id }}"
     cidr: "{{ web_cidr_block }}"

@@ -13,12 +13,16 @@
 - name: Get facts on ELB
   ec2_elb_facts:
     region: "{{ aws_region }}"
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
     names: "{{ env }}-elb"
   register: web_elb_destroy
 
 - name: Remove webserver instance from external ELB
   ec2_elb:
     region: "{{ aws_region }}"
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
     ec2_elbs:  "{{ env }}-elb"
     instance_id: "{{ item.instance_id }}"
     state: absent
@@ -34,5 +38,7 @@
     name: "{{ env }}-elb"
     state: absent
     region: "{{ aws_region }}"
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
     wait: yes
     wait_timeout: 300

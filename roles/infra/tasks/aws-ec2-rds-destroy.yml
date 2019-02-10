@@ -2,6 +2,8 @@
 - name: Gather facts about webserver instance
   ec2_instance_facts:
     region: "{{ aws_region }}"
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
     filters:
       "tag:Name": "{{ env }}-webserver"
       "tag:Environment": "{{ env }}"
@@ -19,6 +21,8 @@
 - name: Destroy webserver instance
   ec2:
     region: "{{ aws_region }}"
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
     state: absent
     instance_ids: "{{ destroyed_ec2.instances[0].instance_id }}"
     wait: true
@@ -29,6 +33,8 @@
 - name: Destroy RDS instance
   rds:
     region: "{{ aws_region }}"
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
     command: delete
     instance_name: "{{ env }}-database"
     wait: yes
@@ -37,5 +43,7 @@
 - name: Destroy RDS subnet
   rds_subnet_group:
     region: "{{ aws_region }}"
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
     state: absent
     name: rds-subnet

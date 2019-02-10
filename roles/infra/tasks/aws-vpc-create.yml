@@ -18,6 +18,8 @@
 - name: Create Private subnets for database servers
   ec2_vpc_subnet:
     region: "{{ aws_region }}"
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
     state: present
     az: "{{ item.az }}"
     cidr: "{{ item.cidr }}"
@@ -32,6 +34,8 @@
 - name: Create Public subnet for web servers
   ec2_vpc_subnet:
     region: "{{ aws_region }}"
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
     state: present
     vpc_id: "{{ created_vpc.vpc.id }}"
     cidr: "{{ web_cidr_block }}"
@@ -59,6 +63,8 @@
 - name: Create IGW
   ec2_vpc_igw:
     region: "{{ aws_region }}"
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
     vpc_id: "{{ created_vpc.vpc.id }}"
     state: present
     tags:
@@ -74,6 +80,8 @@
   ec2_vpc_route_table:
     vpc_id: "{{ created_vpc.vpc.id }}"
     region: "{{ aws_region }}"
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
     state: present
     tags:
       Name: Public

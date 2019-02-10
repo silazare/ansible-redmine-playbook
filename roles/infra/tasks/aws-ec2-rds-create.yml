@@ -3,6 +3,8 @@
   ec2_ami_facts:
     owners: 099720109477
     region: "{{ aws_region }}"
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
     filters:
       name: "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-*"
   register: ami_xenial
@@ -44,6 +46,8 @@
 - name: Create RDS subnet
   rds_subnet_group:
     region: "{{ aws_region }}"
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
     state: present
     name: rds-subnet
     description: RDS subnet
@@ -60,6 +64,8 @@
 - name: Create RDS instance
   rds:
     region: "{{ aws_region }}"
+    secret_key: "{{ secret_key }}"
+    access_key: "{{ access_key }}"
     command: create
     instance_name: "{{ env }}-database"
     db_engine: MySQL
