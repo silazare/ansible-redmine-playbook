@@ -54,6 +54,7 @@
 # Create CDN only if new ELB was created
 - name: Create Cloudfront distribution for external ELB endpoint
   cloudfront_distribution:
+    region: "{{ aws_region }}"
     state: present
     default_origin_domain_name: "{{ web_elb.elb.dns_name }}"
     default_cache_behavior:

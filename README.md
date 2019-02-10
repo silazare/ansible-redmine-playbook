@@ -6,7 +6,7 @@ This is a test task to deploy Redmine application on EC2+RDS+CDN in AWS.
 Hence things are oversimplified and credentials are stored as plain text vars without vault.
 
 - Prerequisites:
-  - Ansible 2.7.5, playbook will not work on earlier versions like 2.6.X
+  - Ansible 2.7.5, playbook will not work on earlier versions like 2.6.X. If you are using clean host or Vagrant to run playbook - you can use requirements.txt to install needed dependencies.
   - AWS account with API access credentials.
 
 - Notices and possible issues:

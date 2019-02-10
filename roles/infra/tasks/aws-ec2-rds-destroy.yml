@@ -1,6 +1,7 @@
 ---
 - name: Gather facts about webserver instance
   ec2_instance_facts:
+    region: "{{ aws_region }}"
     filters:
       "tag:Name": "{{ env }}-webserver"
       "tag:Environment": "{{ env }}"

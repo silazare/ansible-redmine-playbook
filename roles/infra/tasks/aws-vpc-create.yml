@@ -17,6 +17,7 @@
 
 - name: Create Private subnets for database servers
   ec2_vpc_subnet:
+    region: "{{ aws_region }}"
     state: present
     az: "{{ item.az }}"
     cidr: "{{ item.cidr }}"
@@ -30,6 +31,7 @@
 
 - name: Create Public subnet for web servers
   ec2_vpc_subnet:
+    region: "{{ aws_region }}"
     state: present
     vpc_id: "{{ created_vpc.vpc.id }}"
     cidr: "{{ web_cidr_block }}"
@@ -84,6 +86,7 @@
 
 - name: Create WEB security group
   ec2_group:
+    region: "{{ aws_region }}"
     name: "WEB-SG"
     description: Security Group for Webserver
     vpc_id: "{{ created_vpc.vpc.id }}"
@@ -112,6 +115,7 @@
 
 - name: Create DB security group
   ec2_group:
+    region: "{{ aws_region }}"
     name: "DB-SG"
     description: Security Group for Database
     vpc_id: "{{ created_vpc.vpc.id }}"
