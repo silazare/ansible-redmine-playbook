@@ -65,8 +65,7 @@
     src: "/urs/share/nginx/modules/{{ item }}.conf"
     dest: "{{ nginx_conf_dir }}/modules-enabled/{{ item }}.conf"
   with_items: "{{ nginx_module_configs }}"
-  when: (item not in nginx_remove_modules) and (item not in nginx_disabled_modules)
+  when: (item not in nginx_remove_modules) and (item not in nginx_disabled_modules) and (ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux')
   ignore_errors: "{{ ansible_check_mode }}"
   notify:
     - reload nginx
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'

@@ -75,3 +75,6 @@
        proxy:
         - proxy_set_header X-Real-IP  $remote_addr
         - proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for
+        - add_header Access-Control-Allow-Origin *
+        - add_header cloudfront-viewer-country $http_cloudfront_viewer_country
+        - add_header 'Access-Control-Expose-Headers' 'cloudfront-viewer-country'

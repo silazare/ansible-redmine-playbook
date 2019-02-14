@@ -9,6 +9,8 @@
   until: redmine_install is success
   retries: 10
   delay: 2
+  tags:
+    - skip_ansible_lint
 
 - name: Clone Redmine repository
   git:
@@ -115,7 +117,7 @@
   args:
    chdir: "{{ redmine_path }}"
    creates: "{{ redmine_path }}/config/initializers/secret_token.rb"
-  when: secret_token_stat.stat.exists == False
+  when: not secret_token_stat.stat.exists
   tags:
     - skip_ansible_lint
 
