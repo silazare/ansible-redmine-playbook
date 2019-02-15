@@ -53,13 +53,15 @@
   with_items:
     - "{{ webserver_gathered_facts.instances }}"
 
-# Create CDN only if new ELB was created
+# Cloudfront module has and idempotency error https://github.com/ansible/ansible/pull/49434
+# Workaround to ignore idempotency error and random 403 API errors.
 - name: Create Cloudfront distribution for external ELB endpoint
   cloudfront_distribution:
     region: "{{ aws_region }}"
     secret_key: "{{ secret_key }}"
     access_key: "{{ access_key }}"
     state: present
+    caller_reference: "{{ cdn_caller_reference }}"
     default_origin_domain_name: "{{ web_elb.elb.dns_name }}"
     default_cache_behavior:
       forwarded_values:
@@ -87,12 +89,15 @@
       Name: "{{ env }}-distribution"
       Project: "{{ env }}"
       Priority: '1'
-  when: web_elb.changed
   register: cdn
+  until: cdn is success
+  retries: 10
+  delay: 2
+  failed_when: False
 
 # Print CDN endpoint only if new ELB was created
 - name: Print CDN endpoint
   debug:
     msg: "{{ cdn.domain_name }}"
     verbosity: 1
-  when: web_elb.changed
+  when: cdn.changed

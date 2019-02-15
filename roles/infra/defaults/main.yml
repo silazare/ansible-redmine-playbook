@@ -21,3 +21,6 @@ instance_type: t2.micro
 
 # RDS default variables
 db_instance_class: db.t2.micro
+
+# Cloudfront default_caller
+cdn_caller_reference: 20190215120000
