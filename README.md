@@ -3,10 +3,10 @@
 ### Project description properties and prerequisites
 
 This is a test task to deploy Redmine application on EC2+RDS+CDN in AWS.
-Hence things are oversimplified and credentials are stored as plain text vars without vault.
+Hence things are oversimplified - credentials are stored as plain text vars without vault and IaC plays together with App Configuration Management.
 
 - Prerequisites:
-  - Ansible 2.7.5, playbook will not work on earlier versions like 2.6.X. If you are using clean host or Vagrant to run playbook - you can use requirements.txt to install needed dependencies.
+  - Ansible 2.7.5, as playbook will not work on earlier versions like 2.6.X. If you are using clean host or Vagrant to run playbook - you can use requirements.txt to install needed dependencies.
   - AWS account with API access credentials.
 
 - Notices and possible issues:
@@ -47,16 +47,16 @@ aws_keypair: <set your working AWS ssh keypair here for EC2 access, for example 
 ansible_ssh_private_key_file: <set your working AWS ssh key file name here for EC2 access, for example 'EC2.pem'
 ```
 
-- Run playbook to create all services and wait until it will completed:
+- Run playbook to create all services and wait until it will be completed:
 ```sh
 ansible-playbook site.yml --extra-vars="vpc_state=present"
 ```
 
-- Check the Cloudfront distribution status in AWS console, its creation will take time. When status becomes Deployed and Enabled then open the service by domain name, like dxxxxxxxxxxxxx.cloudfront.net.
+- Check the Cloudfront distribution status in AWS console, its creation will take time. When status becomes Deployed and Enabled then you can open the service by domain name, like dxxxxxxxxxxxxx.cloudfront.net.
 
-- Default admin credentials to Redmine are: 'admin/admin'. Service will force to set new password after first login, after it you may start use the service.
+- Default admin credentials to Redmine are: 'admin/admin'. Service will force to set new password after first login and then you can start to use the service.
 
-- Run playbook to cleanup all created AWS services when needed and wait until it will completed:
+- Run playbook to cleanup all created AWS services when needed and wait until it will be completed:
 ```sh
 ansible-playbook site.yml --extra-vars="vpc_state=absent"
 ```

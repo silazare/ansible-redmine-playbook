@@ -27,14 +27,14 @@
         path: "{{ nginx_amplify_script_path }}"
         state: absent
 
-  when: amplify_agent_installed.failed == true
+  when: amplify_agent_installed.failed
   tags: [configuration, packages]
 
 - name: Update Amplify Agent if already installed and update flag is enabled
   package:
     name: nginx-amplify-agent
-    state: latest
-  when: amplify_agent_installed.failed == false and nginx_amplify_update_agent == true
+    state: present
+  when: not amplify_agent_installed.failed and nginx_amplify_update_agent
   tags: [packages]
 
 - name: Verify Amplify agent is up and running

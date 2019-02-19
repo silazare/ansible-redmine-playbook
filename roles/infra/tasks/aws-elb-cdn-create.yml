@@ -53,7 +53,7 @@
   with_items:
     - "{{ webserver_gathered_facts.instances }}"
 
-# Cloudfront module has and idempotency error https://github.com/ansible/ansible/pull/49434
+# Cloudfront module has an idempotency error https://github.com/ansible/ansible/pull/49434
 # Workaround to ignore idempotency error and random 403 API errors.
 - name: Create Cloudfront distribution for external ELB endpoint
   cloudfront_distribution:
@@ -93,11 +93,5 @@
   until: cdn is success
   retries: 10
   delay: 2
+  notify: Print CDN endpoint
   failed_when: False
-
-# Print CDN endpoint only if new ELB was created
-- name: Print CDN endpoint
-  debug:
-    msg: "{{ cdn.domain_name }}"
-    verbosity: 1
-  when: cdn.changed

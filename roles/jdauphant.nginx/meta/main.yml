@@ -1,6 +1,7 @@
 ---
 galaxy_info:
   author: "DAUPHANT Julien"
+  description: "Ansible role for Redmine application deployment"
   license: BSD
   min_ansible_version: 2.4
   platforms:
